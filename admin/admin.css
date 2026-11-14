@@ -1,0 +1,54 @@
+/* Development area: on top of ../style.css */
+body.admin .site-header{background:#1b2333;border-bottom:0}
+body.admin .brand,body.admin .site-header nav a{color:#fff}
+body.admin .brand small{color:#aeb6c8}
+body.admin .brand-mark{background:#f2b632;color:#1b2333}
+body.admin .site-header nav a{margin-inline-start:18px;opacity:.85}
+body.admin .site-header nav a:hover{opacity:1;color:#fff}
+
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 28px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;min-width:170px}
+.stat-n{font-size:24px;font-weight:700;color:var(--accent)}
+.stat-l{font-size:14px;color:var(--ink);line-height:1.4}
+.stat-l span{color:var(--muted);font-size:12.5px}
+
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:12px 0 28px}
+.tool h3{margin:0 0 6px;font-size:18px}
+.tool p{margin:0 0 12px}
+.tool .go{color:var(--accent);font-weight:600;font-size:14px}
+.tool.off{opacity:.6}
+.tool .soon{font-size:12.5px;background:#eef0f5;color:var(--muted);padding:2px 10px;border-radius:6px}
+
+.panel.warn{background:#fff8e6;border-color:#f0dca8}
+.panel.ok{background:var(--ok-soft);border-color:#bfe3cd}
+.panel.err{background:#fdecec;border-color:#f3c4c4;color:#8a1f1f}
+.panel.err ul{margin:6px 0 0}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{display:inline-block;font:inherit;font-size:15px;font-weight:600;padding:9px 20px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;text-decoration:none;cursor:pointer}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:#fff;color:var(--accent)}
+
+.admin-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start;margin-bottom:48px}
+.form fieldset{border:0;padding:0;margin:0 0 22px}
+.form legend{font-weight:700;font-size:16px;margin-bottom:10px}
+.form label{display:block;margin:0 0 12px;font-size:14px;color:var(--muted)}
+.form input[type=text],.form input[type=password],.form select,.form textarea{display:block;width:100%;margin-top:4px;font:inherit;font-size:16px;color:var(--ink);padding:9px 12px;border:1px solid #cfd5e1;border-radius:10px;background:#fff}
+.form input:focus,.form select:focus,.form textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.form.narrow{max-width:420px}
+.lang-field{position:relative}
+.lang-tag{display:inline-block;font-size:12.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:1px 8px;border-radius:6px}
+.hint{font-size:13px;color:var(--muted);margin:-4px 0 0}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{margin:0}
+.seg input{position:absolute;opacity:0}
+.seg span{display:inline-block;padding:8px 14px;border:1px solid #cfd5e1;border-radius:10px;color:var(--ink);font-size:15px;cursor:pointer;background:#fff}
+.seg input:checked+span{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.seg input:focus-visible+span{outline:2px solid var(--accent)}
+details.desc{margin:0 0 8px}
+
+.side h3{margin:0 0 10px;font-size:16px}
+.ctx{margin:0;padding-inline-start:20px;font-size:14px;max-height:520px;overflow:auto}
+.ctx li{margin:0 0 8px}
+.ctx li small{display:block;color:var(--muted);font-size:12px;text-align:right}
+.ctx li.none{list-style:none;margin-inline-start:-20px;color:var(--muted)}
+@media (max-width:800px){.admin-grid{grid-template-columns:1fr}}

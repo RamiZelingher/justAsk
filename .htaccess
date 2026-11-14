@@ -1,0 +1,5 @@
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
+<Files "install.lock">
+  Require all denied
+</Files>

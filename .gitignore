@@ -1,0 +1,19 @@
+# --- secrets / local state ---
+config.php
+install.lock
+
+# --- large media and generated data (kept outside git) ---
+media/
+files/
+flash/
+Graphics/
+graphs/
+ruffle/
+flashtest/
+db/*
+!db/schema.sql
+
+# --- backups and leftovers ---
+*.bak*
+_to_delete*
+*.zip
