@@ -47,7 +47,14 @@ function csrf_token() {
 function csrf_field() { return '<input type="hidden" name="csrf" value="' . h(csrf_token()) . '">'; }
 function csrf_ok() { return hash_equals(csrf_token(), (string)($_POST['csrf'] ?? '')); }
 
+/** Relative path from the current page to the admin folder ('' in admin/, '../' in admin/docs/). */
+function admin_base() {
+    $here = realpath(dirname($_SERVER['SCRIPT_FILENAME'] ?? __FILE__));
+    return ($here && $here !== realpath(__DIR__)) ? '../' : '';
+}
+
 function admin_header($title) {
+    $b = admin_base();
     header('Content-Type: text/html; charset=utf-8'); ?>
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -58,13 +65,13 @@ function admin_header($title) {
 <title><?= h($title) ?> · פיתוח · JustAsk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css?v=<?= @filemtime(dirname(__DIR__) . '/style.css') ?>">
-<link rel="stylesheet" href="admin.css?v=<?= @filemtime(__DIR__ . '/admin.css') ?>">
+<link rel="stylesheet" href="<?= $b ?>../style.css?v=<?= @filemtime(dirname(__DIR__) . '/style.css') ?>">
+<link rel="stylesheet" href="<?= $b ?>admin.css?v=<?= @filemtime(__DIR__ . '/admin.css') ?>">
 </head>
 <body class="admin">
 <header class="site-header"><div class="wrap">
-  <a class="brand" href="index.php"><span class="brand-mark">∑</span><span>JustAsk<small>אזור פיתוח</small></span></a>
-  <nav><a href="index.php">כל הפונקציות</a><a href="../index.php?lang=he">לאתר ←</a></nav>
+  <a class="brand" href="<?= $b ?>index.php"><span class="brand-mark">∑</span><span>JustAsk<small>אזור פיתוח</small></span></a>
+  <nav><a href="<?= $b ?>index.php">כל הפונקציות</a><a href="<?= $b ?>docs/index.php">תיעוד</a><a href="<?= $b ?>../index.php?lang=he">לאתר ←</a></nav>
 </div></header>
 <main class="wrap">
 <?php }

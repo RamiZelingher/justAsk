@@ -78,3 +78,25 @@ form.inline{display:inline}
 .runout .runhead{margin-bottom:8px}
 .runout pre{max-height:360px;overflow:auto;background:#0f172a;color:#e2e8f0;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;text-align:left;margin:0}
 .trow .cmd{margin-top:6px}
+
+/* v30: documentation pages (admin/docs) */
+.dbtoc{display:flex;flex-wrap:wrap;gap:14px 28px}
+.dbtoc div{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.dbtoc strong{margin-inline-end:4px}
+.dbtoc a{font-family:ui-monospace,Consolas,monospace;font-size:.85em;background:#eef3fb;border-radius:6px;padding:2px 8px;text-decoration:none}
+.dbgroup{margin-top:32px}
+.dbtable{scroll-margin-top:16px}
+.dbtable h3{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+.dbtable h3 code{font-size:1.05em}
+.dbbadge{font-size:.75em;font-weight:500;background:#e7f5ec;color:#1f6b3b;border-radius:20px;padding:2px 10px}
+.dbbadge.bad{background:#fdeaea;color:#a12b2b}
+.dbwrap{overflow-x:auto}
+.dbcols td{vertical-align:top}
+.dbcols td:first-child{white-space:nowrap}
+.dbcols .ty{white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:.85em;color:#555;text-align:left}
+.dbcols .nul{font-size:.8em;color:#999}
+.dbcols tr.missing td{opacity:.6}
+.nodoc{color:#a12b2b;font-size:.9em}
+
+.dbtable bdi.lt{direction:ltr;unicode-bidi:isolate;font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:#f3f5f9;border-radius:4px;padding:0 3px}
+.dbcols .fk{white-space:nowrap}
