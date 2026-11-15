@@ -71,3 +71,10 @@ form.inline{display:inline}
 .cmd{display:flex;align-items:center;gap:6px;max-width:100%}
 .cmd code{display:block;max-width:560px;overflow-x:auto;white-space:nowrap;background:#f3f5fa;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12.5px}
 .btn.small{padding:6px 14px;font-size:14px;text-decoration:none}
+.runform{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.runform input,.runform select{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px}
+.runform .num{width:90px}
+.runform .wide{width:300px;max-width:100%}
+.runout .runhead{margin-bottom:8px}
+.runout pre{max-height:360px;overflow:auto;background:#0f172a;color:#e2e8f0;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;text-align:left;margin:0}
+.trow .cmd{margin-top:6px}
