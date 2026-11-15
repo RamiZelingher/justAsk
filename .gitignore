@@ -3,13 +3,13 @@ config.php
 install.lock
 
 # --- large media and generated data (kept outside git) ---
-media/
-files/
-flash/
-Graphics/
-graphs/
-ruffle/
-flashtest/
+/media/
+/files/
+/flash/
+/Graphics/
+/graphs/
+/ruffle/
+/flashtest/
 db/*
 !db/schema.sql
 
