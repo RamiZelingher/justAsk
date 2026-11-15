@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../inc/db.php';
 require_once __DIR__ . '/../inc/i18n.php';
 
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+require_once __DIR__ . '/../inc/auth.php';   // session, CSRF, users
 
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
@@ -14,12 +14,14 @@ function is_local_request() {
 
 /** Access: with no admin_password in config.php the area opens only from this computer; with one, a login is required. */
 function admin_guard() {
+    if (is_role('admin')) return;   // a system administrator logged in to the site may enter from any computer
     $pw = (string)cfg('admin_password');
     if ($pw === '') {
         if (is_local_request()) return;
         http_response_code(403);
         admin_header('אין גישה');
-        echo '<div class="panel">אזור הפיתוח פתוח רק מהמחשב שעליו רץ האתר. כדי לפתוח אותו מבחוץ, הגדר סיסמה ב-<code>config.php</code> (<code>admin_password</code>).</div>';
+        echo '<div class="panel">אזור הפיתוח פתוח רק מהמחשב שעליו רץ האתר, או למנהל מערכת שנכנס לאתר (<a href="' . admin_base() . '../login.php?next=admin/index.php">כניסה</a>).'
+           . '  כדי לפתוח אותו מבחוץ, הגדר סיסמה ב-<code>config.php</code> (<code>admin_password</code>).</div>';
         admin_footer(); exit;
     }
     if (!empty($_SESSION['admin_ok'])) return;
@@ -39,13 +41,6 @@ function admin_guard() {
        . '<button class="btn" name="admin_login" value="1">כניסה</button></form>';
     admin_footer(); exit;
 }
-
-function csrf_token() {
-    if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(16));
-    return $_SESSION['csrf'];
-}
-function csrf_field() { return '<input type="hidden" name="csrf" value="' . h(csrf_token()) . '">'; }
-function csrf_ok() { return hash_equals(csrf_token(), (string)($_POST['csrf'] ?? '')); }
 
 /** Relative path from the current page to the admin folder ('' in admin/, '../' in admin/docs/). */
 function admin_base() {
@@ -71,7 +66,7 @@ function admin_header($title) {
 <body class="admin">
 <header class="site-header"><div class="wrap">
   <a class="brand" href="<?= $b ?>index.php"><span class="brand-mark">∑</span><span>JustAsk<small>אזור פיתוח</small></span></a>
-  <nav><a href="<?= $b ?>index.php">כל הפונקציות</a><a href="<?= $b ?>docs/index.php">תיעוד</a><a href="<?= $b ?>../index.php?lang=he">לאתר ←</a></nav>
+  <nav><a href="<?= $b ?>index.php">כל הפונקציות</a><a href="<?= $b ?>users.php">משתמשים</a><a href="<?= $b ?>docs/index.php">תיעוד</a><a href="<?= $b ?>../index.php?lang=he">לאתר ←</a></nav>
 </div></header>
 <main class="wrap">
 <?php }

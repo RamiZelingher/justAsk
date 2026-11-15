@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/i18n.php';
+require_once __DIR__ . '/auth.php';
 
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function kind_label($k) { return t('kind_' . ($k ?: 'other')); }
@@ -80,11 +81,26 @@ function page_header($title) {
 <body>
 <header class="site-header"><div class="wrap">
   <a class="brand" href="index.php"><span class="brand-mark">∑</span><span>JustAsk<small><?= h(t('site_tagline')) ?></small></span></a>
+  <div class="hright">
+  <?php $cu = current_user(); $here = basename($_SERVER['SCRIPT_NAME'] ?? 'index.php') . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''); ?>
+  <nav class="usernav" aria-label="<?= h(t('my_account')) ?>">
+  <?php if ($cu): ?>
+    <a href="my.php" class="uname" title="<?= h(t('role_' . $cu['role'])) ?>">&#128100; <?= h($cu['full_name']) ?></a>
+    <?php if ($cu['role'] === 'student'): ?><a href="my.php"><?= h(t('my_questions')) ?></a><?php endif; ?>
+    <?php if ($cu['role'] !== 'student'): ?><a href="teacher.php"><?= h(t('my_students')) ?></a><?php endif; ?>
+    <?php if ($cu['role'] === 'admin'): ?><a href="admin/index.php"><?= h(t('manage')) ?></a><?php endif; ?>
+    <form method="post" action="logout.php" class="inline"><?= csrf_field() ?><button class="linkbtn"><?= h(t('logout')) ?></button></form>
+  <?php else: ?>
+    <a href="login.php?next=<?= h(rawurlencode($here)) ?>"><?= h(t('login')) ?></a>
+    <a href="register.php?next=<?= h(rawurlencode($here)) ?>" class="reg"><?= h(t('register')) ?></a>
+  <?php endif; ?>
+  </nav>
   <nav class="langs" aria-label="Language">
     <?php foreach (LANGS as $code => $info): ?>
       <a href="<?= h(url_lang($code)) ?>" lang="<?= $code ?>"<?= $code === $l ? ' class="on" aria-current="true"' : '' ?>><?= h($info[0]) ?></a>
     <?php endforeach; ?>
   </nav>
+  </div>
 </div></header>
 <main class="wrap">
 <?php }

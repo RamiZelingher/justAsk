@@ -61,6 +61,8 @@ $next = ($pos !== false && $pos < count($ids) - 1) ? $ids[$pos + 1] : null;
 $n = $pos === false ? 1 : $pos + 1;
 $total = max(count($ids), 1);
 $exam = exam_label(['exam_title' => $q['exam_title'], 'year' => $q['year'], 'session' => $q['session'], 'units' => $q['exam_units']]);
+$seen = visits_of([$id])[$id] ?? null;   // the student's earlier visits, read before this one is recorded
+if ($available) record_visit($id);
 
 page_header(t('question_x_of_y', $n, $total) . ($main ? ' · ' . $main['name'] : ''));
 if (!$available): ?>
@@ -79,6 +81,7 @@ if (!$available): ?>
   <span class="tag units"><?= h(units_label($q['units'])) ?></span>
   <?php if ($q['exam_title']): ?><span class="tag"><?= h(t('exam_q', $exam, (int)$q['question_no'])) ?></span><?php endif; ?>
   <span class="tag qid"><?= h(t('id_label', (int)$q['id'])) ?></span>
+  <?php if ($seen): ?><span class="tag visited">&#10003; <?= h(t('visited_before', (int)$seen['n'], fmt_dt($seen['last']))) ?></span><?php endif; ?>
   <?php $pdf = q_file($q['pdf_file'] ?? null); $vid = q_file($q['video_file'] ?? null); ?>
   <?php if ($pdf): ?><a class="tag fbtn pdf" href="<?= h($pdf) ?>" target="_blank" rel="noopener">&#128196; <?= h(t('pdf_btn')) ?></a><?php endif; ?>
   <?php if ($vid): ?><button type="button" class="tag fbtn video" onclick="var v=document.getElementById('qvideo');v.hidden=!v.hidden;if(!v.hidden)v.querySelector('video').play();">&#9654; <?= h(t('video_btn')) ?></button><?php endif; ?>

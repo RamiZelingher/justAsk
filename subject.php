@@ -27,6 +27,7 @@ if (tlang() && $questions) {
     foreach ($questions as &$qq) { $pid = $first[(int)$qq['id']] ?? 0; if (isset($m[$pid])) $qq['body_html'] = $m[$pid]; }
     unset($qq);
 }
+$vis = $questions ? visits_of(array_map('intval', array_column($questions, 'id'))) : [];   // questions the logged-in student visited
 $clang = shown_lang($s['content_lang']);
 $cdir = dir_of($clang);
 
@@ -59,8 +60,10 @@ page_header($s['name']); ?>
 <?php if ($questions): ?>
 <ol class="qlist">
 <?php foreach ($questions as $i => $q): ?>
-  <li><a class="card" href="question.php?id=<?= (int)$q['id'] ?>">
+  <?php $v = $vis[(int)$q['id']] ?? null; ?>
+  <li<?= $v ? ' class="visited"' : '' ?>><a class="card" href="question.php?id=<?= (int)$q['id'] ?>">
     <span class="qnum"><?= $i + 1 ?></span>
+    <?php if ($v): ?><span class="vmark" title="<?= h(t('visited_title', (int)$v['n'], fmt_dt($v['last']))) ?>">&#10003; <?= h(t('visited')) ?></span><?php endif; ?>
     <div>
       <div class="kicker"><?= h(t('exam_q', exam_label(['exam_title' => $q['exam_title'], 'year' => $q['year'], 'session' => $q['session'], 'units' => $q['exam_units']]), (int)$q['question_no'])) ?></div>
       <div class="preview" dir="<?= $cdir ?>" lang="<?= h($clang) ?>"><?= content($q['body_html']) ?></div>

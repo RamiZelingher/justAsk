@@ -100,3 +100,16 @@ form.inline{display:inline}
 
 .dbtable bdi.lt{direction:ltr;unicode-bidi:isolate;font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:#f3f5f9;border-radius:4px;padding:0 3px}
 .dbcols .fk{white-space:nowrap}
+
+/* v31: users */
+.msg{padding:10px 14px;border-radius:10px;margin:0 0 14px}
+.msg.ok{background:#e7f5ec;color:#1f6b3b}
+.msg.err{background:#fdeaea;color:#a12b2b}
+a.stat{text-decoration:none;color:inherit}
+.utbl td{vertical-align:middle}
+.utbl select,.utbl .pwin{font:inherit;font-size:14px;padding:5px 8px;border:1px solid #cfd5e1;border-radius:8px;background:#fff}
+.utbl .pwin{width:130px}
+.utbl tr.blocked td{opacity:.55}
+.utbl .num{text-align:center}
+.dt{white-space:nowrap;font-size:13px;color:#666}
+.delf{display:flex;gap:6px;align-items:center;white-space:nowrap}

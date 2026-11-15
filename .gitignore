@@ -12,6 +12,7 @@ install.lock
 /flashtest/
 db/*
 !db/schema.sql
+!db/users.sql
 
 # --- backups and leftovers ---
 *.bak*

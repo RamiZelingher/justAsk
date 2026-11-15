@@ -47,6 +47,11 @@ if (file_exists($lock) && !$force && !$run) {
                 try { $pdo->exec("ALTER DATABASE `$db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"); } catch (Exception $e) { }
             }
         }
+        // users, teacher links and visits: created only when missing, never dropped (db/users.sql)
+        $pdo->exec("USE `$db`");
+        foreach (preg_split('/;\s*\n/', preg_replace('/^--.*$/m', '', file_get_contents(__DIR__ . '/db/users.sql'))) as $sql) {
+            if (trim($sql) !== '') { $pdo->exec($sql); $n1++; }
+        }
         $n2 = 0;
         $pdo->exec("USE `$db`");
         $pdo->exec('SET NAMES utf8mb4');
