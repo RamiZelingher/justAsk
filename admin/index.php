@@ -11,6 +11,7 @@ $unreviewed = (int)q("SELECT COUNT(*) AS n FROM subject_names WHERE is_reviewed 
 $nq = (int)q("SELECT COUNT(*) AS n FROM questions", [], true)['n'];
 
 $tools = [
+    ['tools.php', 'כלי המרה והגדרות', 'גרסת האתר וכתובת המשוב, העלאת קובצי PDF ווידאו לשאלות, מצב התרגום, וכלי ההמרה שבתיקייה tools.', true],
     ['subject_add.php', 'הוספת נושא או תת־נושא', 'נושא חדש במסלול, או תת־נושא תחת נושא קיים, עם השם בעברית, באנגלית ובצרפתית.', true],
     ['', 'עריכת נושאים ותרגומים', 'שינוי שמות, סדר והעברת תת־נושא לנושא אחר.', false],
     ['', 'בדיקת תרגומים', sprintf('מעבר על %d שמות שעוד לא נבדקו, וסימון שלהם כבדוקים.', $unreviewed), false],
