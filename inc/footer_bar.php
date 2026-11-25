@@ -16,7 +16,8 @@ function version_label($v) {
     if (!preg_match('/^(\d{4})-(\d{1,2})$/', (string)$v, $m)) return (string)$v;
     $names = ['he' => ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'],
               'en' => ['January','February','March','April','May','June','July','August','September','October','November','December'],
-              'fr' => ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']];
+              'fr' => ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],
+              'ar' => ['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول']];
     $l = isset($names[lang()]) ? lang() : 'he';
     return $names[$l][(int)$m[2] - 1] . ' ' . $m[1];
 }

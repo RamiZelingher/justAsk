@@ -17,7 +17,7 @@ function content($html) {
 /* ---- translated content -------------------------------------------------------------
    The questions and the theory are written in Hebrew. A page in a language that has
    translations (English) shows the translated text and lists only translated items. */
-const CONTENT_TRANSLATIONS = ['en'];
+const CONTENT_TRANSLATIONS = ['en', 'ar'];
 
 /** The language whose translations this page uses, or null (the content is shown as written). */
 function tlang() { return in_array(lang(), CONTENT_TRANSLATIONS, true) ? lang() : null; }
@@ -65,7 +65,7 @@ function name_joins($alias = 's') {
            " LEFT JOIN subject_names n2 ON n2.subject_id = $alias.id AND n2.lang = " . (lang2() ? db()->quote(lang2()) : 'NULL') . ' ';
 }
 
-function page_header($title) {
+function page_header($title, $opts = []) {
     header('Content-Type: text/html; charset=utf-8');
     $l = lang(); ?>
 <!DOCTYPE html>
@@ -94,11 +94,6 @@ function page_header($title) {
     <a href="login.php?next=<?= h(rawurlencode($here)) ?>"><?= h(t('login')) ?></a>
     <a href="register.php?next=<?= h(rawurlencode($here)) ?>" class="reg"><?= h(t('register')) ?></a>
   <?php endif; ?>
-  </nav>
-  <nav class="langs" aria-label="Language">
-    <?php foreach (LANGS as $code => $info): ?>
-      <a href="<?= h(url_lang($code)) ?>" lang="<?= $code ?>"<?= $code === $l ? ' class="on" aria-current="true"' : '' ?>><?= h($info[0]) ?></a>
-    <?php endforeach; ?>
   </nav>
   </div>
 </div></header>

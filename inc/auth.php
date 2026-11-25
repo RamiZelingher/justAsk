@@ -4,6 +4,14 @@
 require_once __DIR__ . '/db.php';
 
 const ROLES = ['student', 'teacher', 'admin'];
+// Minimum password length. TEMPORARY for development (Rami, 21 Nov 2026): 1 = any non-empty password.
+// To restore the rule, set it back to 8 – labels, browser checks and error messages follow automatically.
+const PASSWORD_MIN = 1;
+function pw_short($pw) { return strlen((string)$pw) < max(1, PASSWORD_MIN); }
+/** Error key for a password that is too short. */
+function pw_err() { return PASSWORD_MIN > 1 ? 'err_password' : 'err_password_empty'; }
+/** Label of a new-password field. */
+function pw_label() { return PASSWORD_MIN > 1 ? t('password_new') : t('password'); }
 date_default_timezone_set(cfg('timezone') ?: 'Asia/Jerusalem');
 
 function auth_session() {
@@ -31,6 +39,12 @@ function user_tables() {
         $sql = preg_replace('/^--.*$/m', '', file_get_contents(dirname(__DIR__) . '/db/users.sql'));
         foreach (preg_split('/;\s*\n/', $sql) as $st) { if (trim($st) !== '') db()->exec($st); }
     }
+    // users.lang (added 21 Nov 2026) on a site installed before it
+    try { db()->query('SELECT lang FROM users LIMIT 1'); }
+    catch (PDOException $e) { db()->exec("ALTER TABLE users ADD COLUMN lang CHAR(2) NOT NULL DEFAULT 'he' AFTER role"); }
+    // users.course (added 21 Nov 2026)
+    try { db()->query('SELECT course FROM users LIMIT 1'); }
+    catch (PDOException $e) { db()->exec("ALTER TABLE users ADD COLUMN course VARCHAR(30) NULL AFTER lang"); }
     $ok = true;
 }
 
@@ -41,7 +55,7 @@ function current_user() {
     $u = null;
     if (!empty($_SESSION['uid'])) {
         user_tables();
-        $u = q("SELECT id, username, email, full_name, role, is_active FROM users WHERE id = ? AND is_active = 1", [(int)$_SESSION['uid']], true);
+        $u = q("SELECT id, username, email, full_name, role, lang, course, is_active FROM users WHERE id = ? AND is_active = 1", [(int)$_SESSION['uid']], true);
         if (!$u) unset($_SESSION['uid']);
     }
     return $u;
@@ -89,16 +103,30 @@ function user_check($username, $email, $full_name, $password) {
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $err[] = 'err_email';
     elseif ($email !== '' && q("SELECT 1 FROM users WHERE email = ?", [$email], true)) $err[] = 'err_email_taken';
     if (mb_strlen(trim($full_name)) < 2) $err[] = 'err_name';
-    if (strlen($password) < 8) $err[] = 'err_password';
+    if (pw_short($password)) $err[] = pw_err();
     return $err;
 }
 
-function user_create($username, $email, $full_name, $password, $role = 'student') {
+function user_create($username, $email, $full_name, $password, $role = 'student', $lang = 'he', $course = null) {
     user_tables();
-    q("INSERT INTO users (username, email, full_name, password_hash, role) VALUES (?, ?, ?, ?, ?)",
-      [$username, $email !== '' ? $email : null, trim($full_name), password_hash($password, PASSWORD_DEFAULT), in_array($role, ROLES, true) ? $role : 'student']);
+    q("INSERT INTO users (username, email, full_name, password_hash, role, lang, course) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [$username, $email !== '' ? $email : null, trim($full_name), password_hash($password, PASSWORD_DEFAULT), in_array($role, ROLES, true) ? $role : 'student',
+       isset(LANGS[$lang]) ? $lang : 'he', course_ok($course)]);
     return (int)db()->lastInsertId();
 }
+
+/** The courses a user can belong to: [curricula.code => name in Hebrew], from the curricula table. */
+function course_list() {
+    static $list = null;
+    if ($list === null) {
+        $list = [];
+        foreach (q("SELECT c.code, COALESCE(n.name, c.code) AS name FROM curricula c
+                    LEFT JOIN curriculum_names n ON n.curriculum_id = c.id AND n.lang = 'he' WHERE 1=1" . fr_off_sql('c') . " ORDER BY c.sort_order, c.id") as $r) $list[$r['code']] = $r['name'];
+    }
+    return $list;
+}
+/** A valid course code, or null. */
+function course_ok($code) { $code = (string)$code; return $code !== '' && isset(course_list()[$code]) ? $code : null; }
 
 /* ---- question visits ---------------------------------------------------------------- */
 

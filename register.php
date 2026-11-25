@@ -31,8 +31,8 @@ page_header(t('register_title')); ?>
     <label><?= h(t('full_name')) ?><input name="full_name" value="<?= h($f['full_name']) ?>" autocomplete="name" required></label>
     <label><?= h(t('username')) ?><input name="username" value="<?= h($f['username']) ?>" autocomplete="username" dir="ltr" required pattern="[A-Za-z0-9_.\-]{3,40}"><small><?= h(t('username_help')) ?></small></label>
     <label><?= h(t('email_opt')) ?><input type="email" name="email" value="<?= h($f['email']) ?>" autocomplete="email" dir="ltr"></label>
-    <label><?= h(t('password_new')) ?><input type="password" name="password" autocomplete="new-password" dir="ltr" required minlength="8"></label>
-    <label><?= h(t('password2')) ?><input type="password" name="password2" autocomplete="new-password" dir="ltr" required minlength="8"></label>
+    <label><?= h(pw_label()) ?><input type="password" name="password" autocomplete="new-password" dir="ltr" required minlength="<?= PASSWORD_MIN ?>"></label>
+    <label><?= h(t('password2')) ?><input type="password" name="password2" autocomplete="new-password" dir="ltr" required minlength="<?= PASSWORD_MIN ?>"></label>
     <button class="abtn"><?= h(t('register')) ?></button>
   </form>
   <p class="alink"><a href="login.php?next=<?= h(rawurlencode($next)) ?>"><?= h(t('have_account')) ?></a></p>

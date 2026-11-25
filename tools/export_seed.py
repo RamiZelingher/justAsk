@@ -45,6 +45,13 @@ else:
 img_files = {f.lower(): f for f in img_sizes}
 
 
+def find_img(fn):
+    """Image file for a legacy name: case-insensitive; the 2006-2008 data also has names starting with '/'
+    and names without an extension, which the old site served as .gif."""
+    f = (fn or '').strip().lstrip('/').lower()
+    return img_files.get(f) or (img_files.get(f + '.gif') if f and '.' not in f.rsplit('/', 1)[-1] else None)
+
+
 def node(ref):
     v = D.get(ref)
     return None if v is None else decode_val(v)
@@ -162,7 +169,7 @@ def render_obj(oid, ctx):
             fn = o[4] if o[4] and o[4].lower() not in LEGACY_ICONS | {'309a.gif'} else ''
             if not fn:
                 return ''
-        real = img_files.get((fn or '').lower())
+        real = find_img(fn)
         if not real:
             missing_media.add(fn)
             return ''
@@ -224,8 +231,8 @@ for r in D:
     if m:
         q_subjects.setdefault(m.group(1), set()).add(m.group(2))
 QUESTIONS = sorted(set(m.group(1) for r in D for m in [re.match(r'\^JustAskooQuestionD\("([^"]+)"\)$', r)] if m))
-NEW_SESSIONS = {'SA': 'קיץ מועד א', 'SB': 'קיץ מועד ב', 'WA': 'חורף'}
-SESSION_ORDER = {'ינואר': 1, 'חורף': 1, 'מאי': 2, 'יוני': 3, 'קיץ': 3, 'קיץ מועד א': 3, 'יולי': 4, 'קיץ מועד ב': 4, 'דצמבר': 5}
+NEW_SESSIONS = {'SA': 'קיץ מועד א', 'SB': 'קיץ מועד ב', 'SC': 'קיץ מועד מיוחד', 'WA': 'חורף'}
+SESSION_ORDER = {'ינואר': 1, 'חורף': 1, 'מאי': 2, 'יוני': 3, 'קיץ': 3, 'קיץ מועד א': 3, 'יולי': 4, 'קיץ מועד ב': 4, 'קיץ מועד מיוחד': 4.5, 'דצמבר': 5}
 
 exams, questions = {}, []
 for qid in QUESTIONS:
@@ -233,6 +240,9 @@ for qid in QUESTIONS:
     subs = q_subjects.get(qid, set())
     units = int(head[0]) if str(head[0]).isdigit() else (int(sorted(subs)[0][0]) if subs else 4)
     src_id = str(head[7])
+    m_q = re.match(r'([DEFG])\d{4}[SW][ABC]$', src_id)
+    if m_q:   # new-program questionnaires: D, E = 4 units, F, G = 5 units (the legacy units field is unreliable there)
+        units = 4 if m_q.group(1) in 'DE' else 5
     if src_id not in exams:
         src = node('^JustAskooSourceD(%s)' % (src_id if src_id.isdigit() else '"%s"' % src_id))
         if src:
@@ -241,10 +251,10 @@ for qid in QUESTIONS:
             sess = re.search(r'יחידות\s+(.+?)\s+(?:19|20)\d\d', title)
             sess = sess.group(1) if sess else None
             if not sess:   # new program: "שאלון ז' קיץ 2005 - מועד ב'"
-                sess = 'חורף' if 'חורף' in title else ('קיץ מועד ב' if 'מועד ב' in title else ('קיץ מועד א' if 'קיץ' in title else None))
+                sess = 'חורף' if 'חורף' in title else ('קיץ מועד ב' if 'מועד ב' in title else ('קיץ מועד מיוחד' if 'מועד מיוחד' in title else ('קיץ מועד א' if 'קיץ' in title else None)))
             exams[src_id] = dict(title=title, units=units, year=int(ym.group(0)) if ym else None, session=sess)
         else:   # 2004-2005 exams (new program), e.g. D2004SA = questionnaire D, summer 2004, sitting A
-            m = re.match(r'([A-Z])(\d{4})([SW][AB])$', src_id)
+            m = re.match(r'([A-Z])(\d{4})([SW][ABC])$', src_id)
             year, sess = (int(m.group(2)), NEW_SESSIONS.get(m.group(3))) if m else (None, None)
             title = '%d יחידות %s %s, שאלון %s' % (units, sess or '', year or '', m.group(1) if m else src_id)
             exams[src_id] = dict(title=re.sub(r'\s+', ' ', title), units=units, year=year, session=sess)

@@ -113,3 +113,8 @@ a.stat{text-decoration:none;color:inherit}
 .utbl .num{text-align:center}
 .dt{white-space:nowrap;font-size:13px;color:#666}
 .delf{display:flex;gap:6px;align-items:center;white-space:nowrap}
+
+.ftable.totals td:nth-child(n+3),.ftable.totals th:nth-child(n+3){text-align:center}
+.ftable.totals tfoot th{background:#f1f3f8;border-top:2px solid #d5dae6;font-weight:700}
+.totals-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+@media print{.site-header,.totals-bar .btn,footer{display:none!important}}

@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS users (
   full_name     VARCHAR(120) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,             -- password_hash() (bcrypt / argon2); the password itself is never stored
   role          ENUM('student','teacher','admin') NOT NULL DEFAULT 'student',
+  lang          CHAR(2)      NOT NULL DEFAULT 'he', -- interface language of this user: he / en / fr (set by the administrator)
+  course        VARCHAR(30)  NULL,                 -- the user's course = curricula.code (e.g. 4 or 5 study units); NULL = not set.
+                                                   -- No foreign key: the content tables are dropped and rebuilt on reinstall (codes stay the same).
   is_active     TINYINT(1)   NOT NULL DEFAULT 1,   -- 0 = blocked: cannot log in
   created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_login_at DATETIME     NULL

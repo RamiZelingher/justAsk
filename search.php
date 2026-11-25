@@ -53,7 +53,7 @@ if ($words) {
     $rows = q("SELECT s.id, s.slug, s.parent_id, s.curriculum_id, c.content_lang, sn.lang, sn.name
                  FROM subjects s JOIN curricula c ON c.id = s.curriculum_id
                  JOIN subject_names sn ON sn.subject_id = s.id AND sn.lang IN ($in)" .
-              (lang() === 'he' ? " WHERE c.content_lang <> 'fr'" : ''));
+              (lang() === 'he' || !FRENCH_ENABLED ? " WHERE c.content_lang <> 'fr'" : ''));
     foreach ($rows as $r) {
         $sc = match_score($r['name'], $words);
         if ($sc && (!isset($subjects[$r['id']]) || $sc > $subjects[$r['id']]['score'])) $subjects[$r['id']] = ['score' => $sc] + $r;

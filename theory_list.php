@@ -6,7 +6,7 @@ $s = q("SELECT s.id, s.slug, s.parent_id, s.curriculum_id, n.name, c.code AS cur
           JOIN curricula c ON c.id = s.curriculum_id
           LEFT JOIN curriculum_names cn ON cn.curriculum_id = c.id AND cn.lang = " . db()->quote(lang()) . "
          WHERE s.slug = ?", [$_GET['s'] ?? ''], true);
-if (!$s) not_found();
+if (!$s || (!FRENCH_ENABLED && $s['content_lang'] === 'fr')) not_found();
 $parent = $s['parent_id'] ? q("SELECT s.slug, n.name FROM subjects s" . name_joins('s') . " WHERE s.id = ?", [$s['parent_id']], true) : null;
 
 // the subject itself first, then its subtopics in study order

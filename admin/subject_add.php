@@ -2,10 +2,10 @@
 require __DIR__ . '/_admin.php';
 admin_guard();
 
-$LANG_FIELDS = ['he' => ['עברית', 'rtl'], 'en' => ['English', 'ltr'], 'fr' => ['Français', 'ltr']];
+$LANG_FIELDS = array_intersect_key(['he' => ['עברית', 'rtl'], 'en' => ['English', 'ltr'], 'fr' => ['Français', 'ltr']], LANGS);   // no French field while French is switched off
 
 $curricula = q("SELECT c.*, cn.name FROM curricula c
-                LEFT JOIN curriculum_names cn ON cn.curriculum_id = c.id AND cn.lang = 'he' ORDER BY c.sort_order");
+                LEFT JOIN curriculum_names cn ON cn.curriculum_id = c.id AND cn.lang = 'he' WHERE 1=1" . fr_off_sql('c') . " ORDER BY c.sort_order");
 $curById = [];
 foreach ($curricula as $c) $curById[(int)$c['id']] = $c;
 
@@ -106,7 +106,7 @@ admin_header('הוספת נושא'); ?>
 
 <?php if ($done): $dp = $done['parent_id'] ? $byId[(int)$done['parent_id']] : null; ?>
 <div class="panel ok">
-  <strong>נשמר:</strong> <?= h($done['he']) ?> · <span dir="ltr"><?= h($done['en']) ?></span> · <span dir="ltr"><?= h($done['fr']) ?></span>
+  <strong>נשמר:</strong> <?= h($done['he']) ?> · <span dir="ltr"><?= h($done['en']) ?></span><?php if (isset($LANG_FIELDS['fr'])): ?> · <span dir="ltr"><?= h($done['fr']) ?></span><?php endif; ?>
   <?= $dp ? '<br>תת־נושא של ' . h($dp['he']) : '<br>נושא ראשי' ?>
   <div class="actions">
     <a class="btn" href="../subject.php?s=<?= h($done['slug']) ?>&amp;lang=he">צפייה באתר</a>
@@ -158,7 +158,7 @@ admin_header('הוספת נושא'); ?>
     <p class="hint">הכתובת של הדף נוצרת מהשם באנגלית.</p>
   </fieldset>
 
-  <details class="desc"<?= ($v['desc_he'] . $v['desc_en'] . $v['desc_fr']) !== '' ? ' open' : '' ?>>
+  <details class="desc"<?= implode('', array_map(function ($l) use ($v) { return $v["desc_$l"]; }, array_keys($LANG_FIELDS))) !== '' ? ' open' : '' ?>>
     <summary>תיאור קצר (לא חובה)</summary>
     <div class="body">
     <?php foreach ($LANG_FIELDS as $l => [$label, $dir]): ?>

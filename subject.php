@@ -5,7 +5,7 @@ $s = q("SELECT s.*, n.name, n2.name AS name2, c.code AS cur_code, c.content_lang
           JOIN curricula c ON c.id = s.curriculum_id
           LEFT JOIN curriculum_names cn ON cn.curriculum_id = c.id AND cn.lang = " . db()->quote(lang()) . "
          WHERE s.slug = ?", [$_GET['s'] ?? ''], true);
-if (!$s) not_found();
+if (!$s || (!FRENCH_ENABLED && $s['content_lang'] === 'fr')) not_found();
 $parent = $s['parent_id'] ? q("SELECT s.slug, n.name FROM subjects s" . name_joins('s') . " WHERE s.id = ?", [$s['parent_id']], true) : null;
 $children = q("SELECT s.slug, n.name, n2.name AS name2,
                       (SELECT COUNT(*) FROM question_subjects qs JOIN questions qq ON qq.id = qs.question_id
@@ -44,11 +44,12 @@ page_header($s['name']); ?>
 <section class="chapter wide">
   <div class="chapter-head static"><h2><?= h(t('subtopics')) ?></h2></div>
   <ul class="topics">
+    <li class="thead" aria-hidden="true"><span><?= h(t('col_subject')) ?></span><span class="count-col"><?= h(t('questions_word')) ?></span></li>
   <?php foreach ($children as $k): $has = (int)$k['nq'] > 0; ?>
     <li<?= $has ? ' class="has"' : '' ?>><a href="subject.php?s=<?= h($k['slug']) ?>">
       <span class="t-names"><span class="t-name"><?= h($k['name']) ?></span>
       <?php if ($k['name2']): ?><span class="alt" lang="<?= lang2() ?>" dir="<?= dir_of(lang2()) ?>"><?= h($k['name2']) ?></span><?php endif; ?></span>
-      <?php if ($has): ?><span class="count"><?= (int)$k['nq'] ?></span><?php endif; ?>
+      <span class="count-col"><?php if ($has): ?><span class="count"><?= (int)$k['nq'] ?></span><?php endif; ?></span>
     </a></li>
   <?php endforeach; ?>
   </ul>

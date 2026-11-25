@@ -4,7 +4,7 @@
 function search_form($value = '') {
     static $n = 0; $n++;
     $id = 'ts-q' . $n;
-    $speech = ['he' => 'he-IL', 'en' => 'en-US', 'fr' => 'fr-FR'][lang()] ?? 'he-IL'; ?>
+    $speech = ['he' => 'he-IL', 'en' => 'en-US', 'fr' => 'fr-FR', 'ar' => 'ar-IL'][lang()] ?? 'he-IL'; ?>
 <form class="tsearch" action="search.php" method="get" role="search">
   <label for="<?= $id ?>"><?= h(t('search_label')) ?></label>
   <span class="tsbox">

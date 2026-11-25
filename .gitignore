@@ -25,3 +25,7 @@ tools/media/*.html
 tools/**/__pycache__/
 *.db
 todo*.json
+
+# --- legacy 2010 source data (large) ---
+tools/legacy2010/*.gsa*
+tools/legacy2010/*.sql

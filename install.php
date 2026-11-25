@@ -64,6 +64,46 @@ if (file_exists($lock) && !$force && !$run) {
             if (strpos($sql, 'INSERT INTO ') !== 0) continue;
             $pdo->exec($sql); $n2++;
         }
+        // 2006-2008 exams from the Units45 2010 database (added 21 Nov 2026; see admin/import_2010.php)
+        $imp = __DIR__ . '/db/import_2010.json';
+        if (is_file($imp)) {
+            foreach (json_decode(file_get_contents($imp), true)['statements'] as $sql) { $pdo->exec($sql); $n2++; }
+        }
+        // Arabic pilot: subtopic 6.4 and its theory, Arabic subject names (added 21 Nov 2026; see admin/import_ar.php)
+        $imp = __DIR__ . '/db/import_ar.json';
+        if (is_file($imp)) {
+            foreach (json_decode(file_get_contents($imp), true)['statements'] as $sql) { $pdo->exec($sql); $n2++; }
+        }
+        // English for the 2006-2008 questions (added 23 Nov 2026; see admin/import_en2010.php)
+        $imp = __DIR__ . '/db/import_en2010.json';
+        if (is_file($imp)) {
+            foreach (json_decode(file_get_contents($imp), true)['statements'] as $sql) { $pdo->exec($sql); $n2++; }
+        }
+        // Arabic for the first 20 four-unit exams (added 23 Nov 2026; see admin/import_ar2.php)
+        $imp = __DIR__ . '/db/import_ar2.json';
+        if (is_file($imp)) {
+            foreach (json_decode(file_get_contents($imp), true)['statements'] as $sql) { $pdo->exec($sql); $n2++; }
+        }
+        // Arabic for 20 more four-unit exams, 2004-2008 (see admin/import_ar4.php)
+        $imp = __DIR__ . '/db/import_ar4.json';
+        if (is_file($imp)) {
+            foreach (json_decode(file_get_contents($imp), true)['statements'] as $sql) { $pdo->exec($sql); $n2++; }
+        }
+        // Arabic for the last 4 four-unit exams and the four-unit theory (see admin/import_ar5.php)
+        $imp = __DIR__ . '/db/import_ar5.json';
+        if (is_file($imp)) {
+            foreach (json_decode(file_get_contents($imp), true)['statements'] as $sql) { $pdo->exec($sql); $n2++; }
+        }
+        // Arabic for 30 five-unit exams 2004-2008 (see admin/import_ar6.php)
+        $imp = __DIR__ . '/db/import_ar6.json';
+        if (is_file($imp)) {
+            foreach (json_decode(file_get_contents($imp), true)['statements'] as $sql) { $pdo->exec($sql); $n2++; }
+        }
+        // Arabic for 17 five-unit exams 1996-2004 and theory (see admin/import_ar7.php)
+        $imp = __DIR__ . '/db/import_ar7.json';
+        if (is_file($imp)) {
+            foreach (json_decode(file_get_contents($imp), true)['statements'] as $sql) { $pdo->exec($sql); $n2++; }
+        }
         $pdo->commit();
         $counts = [];
         foreach (['questions' => 'שאלות', 'hints' => 'רמזים', 'solution_steps' => 'שלבי פתרון', 'theory_items' => 'פריטי רקע תאורטי'] as $t => $label) {

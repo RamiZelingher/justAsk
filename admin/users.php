@@ -7,6 +7,7 @@ user_tables();
 
 $msg = ''; $err = '';
 $ROLE_HE = ['student' => 'תלמיד', 'teacher' => 'מורה', 'admin' => 'מנהל מערכת'];
+$LANG_HE = array_intersect_key(['he' => 'עברית', 'en' => 'אנגלית', 'ar' => 'ערבית', 'fr' => 'צרפתית'], LANGS);
 $me = current_user();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -17,21 +18,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pw = (string)($_POST['password'] ?? '');
         $errs = user_check($f['username'], $f['email'], $f['full_name'], $pw);
         if ($errs) $err = implode(' ', array_map('t', $errs));
-        else { user_create($f['username'], $f['email'], $f['full_name'], $pw, $f['role']); $msg = 'המשתמש ' . $f['username'] . ' נוצר.'; }
+        else { user_create($f['username'], $f['email'], $f['full_name'], $pw, $f['role'], (string)($_POST['lang'] ?? 'he'), $_POST['course'] ?? null); $msg = 'המשתמש ' . $f['username'] . ' נוצר.'; }
     } elseif ($a === 'update') {
         $id = (int)$_POST['id'];
         $role = in_array($_POST['role'] ?? '', ROLES, true) ? $_POST['role'] : 'student';
         $active = isset($_POST['is_active']) ? 1 : 0;
+        $ulang = isset(LANGS[$_POST['lang'] ?? '']) ? $_POST['lang'] : 'he';
+        $ucourse = course_ok($_POST['course'] ?? '');
         if ($me && $id === (int)$me['id'] && ($role !== 'admin' || !$active)) $err = 'אי אפשר להוריד את ההרשאות או לחסום את המשתמש שאיתו נכנסת.';
         else {
-            q("UPDATE users SET role = ?, is_active = ? WHERE id = ?", [$role, $active, $id]);
+            q("UPDATE users SET role = ?, lang = ?, course = ?, is_active = ? WHERE id = ?", [$role, $ulang, $ucourse, $active, $id]);
             if ($role !== 'student') q("DELETE FROM teacher_students WHERE student_id = ?", [$id]);
             if ($role !== 'teacher') q("DELETE FROM teacher_students WHERE teacher_id = ?", [$id]);
             $msg = 'המשתמש עודכן.';
         }
         $pw = (string)($_POST['new_password'] ?? '');
         if (!$err && $pw !== '') {
-            if (strlen($pw) < 8) $err = 'הסיסמה החדשה צריכה להיות באורך 8 תווים לפחות. שאר השינויים נשמרו.';
+            if (pw_short($pw)) $err = 'הסיסמה החדשה צריכה להיות באורך ' . PASSWORD_MIN . ' תווים לפחות. שאר השינויים נשמרו.';
             else { q("UPDATE users SET password_hash = ? WHERE id = ?", [password_hash($pw, PASSWORD_DEFAULT), $id]); $msg = 'המשתמש עודכן והסיסמה הוחלפה.'; }
         }
     } elseif ($a === 'delete') {
@@ -84,22 +87,26 @@ admin_header('משתמשים'); ?>
     <label>שם משתמש<input type="text" name="username" dir="ltr" required pattern="[A-Za-z0-9_.\-]{3,40}"></label>
     <label>אימייל (רשות)<input type="text" name="email" dir="ltr"></label>
     <label>תפקיד<select name="role"><?php foreach ($ROLE_HE as $r => $l): ?><option value="<?= $r ?>"<?= $r === 'teacher' ? ' selected' : '' ?>><?= h($l) ?></option><?php endforeach; ?></select></label>
-    <label>סיסמה (לפחות 8 תווים)<input type="password" name="password" dir="ltr" required minlength="8" autocomplete="new-password"></label>
+    <label>שפה<select name="lang"><?php foreach ($LANG_HE as $c => $l): ?><option value="<?= $c ?>"><?= h($l) ?></option><?php endforeach; ?></select></label>
+    <label>קורס<select name="course"><option value="">—</option><?php foreach (course_list() as $c => $l): ?><option value="<?= h($c) ?>"><?= h($l) ?></option><?php endforeach; ?></select></label>
+    <label>סיסמה<?= PASSWORD_MIN > 1 ? ' (לפחות ' . PASSWORD_MIN . ' תווים)' : '' ?><input type="text" name="password" dir="ltr" required minlength="<?= PASSWORD_MIN ?>" autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')" class="pwplain"></label>
   </div>
   <button class="btn">יצירה</button>
 </form>
 
 <h2>כל המשתמשים<?= $filter ? ' · ' . h($ROLE_HE[$filter]) . ' <a class="small" href="users.php">(הצג הכול)</a>' : '' ?></h2>
 <div class="panel"><div class="dbwrap"><table class="ftable utbl">
-  <thead><tr><th>שם</th><th>שם משתמש</th><th>תפקיד</th><th>פעיל</th><th>סיסמה חדשה</th><th></th><th>שאלות / כניסות</th><th>נרשם</th><th>כניסה אחרונה</th><th>מחיקה</th></tr></thead>
+  <thead><tr><th>שם</th><th>שם משתמש</th><th>תפקיד</th><th>שפה</th><th>קורס</th><th>פעיל</th><th>סיסמה חדשה</th><th></th><th>שאלות / כניסות</th><th>נרשם</th><th>כניסה אחרונה</th><th>מחיקה</th></tr></thead>
   <tbody>
   <?php foreach ($users as $u): $fid = 'u' . (int)$u['id']; ?>
     <tr<?= $u['is_active'] ? '' : ' class="blocked"' ?>>
       <td><?= h($u['full_name']) ?><?php if ($u['email']): ?><br><small dir="ltr"><?= h($u['email']) ?></small><?php endif; ?></td>
       <td dir="ltr"><?= h($u['username']) ?></td>
       <td><select name="role" form="<?= $fid ?>"><?php foreach ($ROLE_HE as $r => $l): ?><option value="<?= $r ?>"<?= $r === $u['role'] ? ' selected' : '' ?>><?= h($l) ?></option><?php endforeach; ?></select></td>
+      <td><select name="lang" form="<?= $fid ?>"><?php foreach ($LANG_HE as $c => $l): ?><option value="<?= $c ?>"<?= $c === ($u['lang'] ?? 'he') ? ' selected' : '' ?>><?= h($l) ?></option><?php endforeach; ?></select></td>
+      <td><select name="course" form="<?= $fid ?>"><option value="">—</option><?php foreach (course_list() as $c => $l): ?><option value="<?= h($c) ?>"<?= $c === ($u['course'] ?? '') ? ' selected' : '' ?>><?= h($l) ?></option><?php endforeach; ?></select></td>
       <td><input type="checkbox" name="is_active" value="1" form="<?= $fid ?>"<?= $u['is_active'] ? ' checked' : '' ?>></td>
-      <td><input type="password" name="new_password" form="<?= $fid ?>" dir="ltr" placeholder="ללא שינוי" autocomplete="new-password" class="pwin"></td>
+      <td><input type="text" name="new_password" form="<?= $fid ?>" dir="ltr" placeholder="ללא שינוי" autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')" class="pwin pwplain"></td>
       <td><form method="post" id="<?= $fid ?>"><?= csrf_field() ?><input type="hidden" name="action" value="update"><input type="hidden" name="id" value="<?= (int)$u['id'] ?>"><button class="btn small">שמירה</button></form></td>
       <td class="num"><?php if ($u['role'] === 'student'): ?><a href="../teacher.php?student=<?= (int)$u['id'] ?>"><?= (int)$u['nq'] ?> / <?= (int)$u['nvisits'] ?></a><?php else: ?>—<?php endif; ?></td>
       <td class="dt"><?= h(fmt_dt($u['created_at'], false)) ?></td>

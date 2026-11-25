@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_pass'])) {
     $new = (string)($_POST['password'] ?? '');
     if (!csrf_ok()) $err = 'err_csrf';
     elseif (!password_verify((string)($_POST['current'] ?? ''), $row['password_hash'])) $err = 'err_cur_pass';
-    elseif (strlen($new) < 8) $err = 'err_password';
+    elseif (pw_short($new)) $err = pw_err();
     elseif ($new !== (string)($_POST['password2'] ?? '')) $err = 'err_password2';
     else {
         q("UPDATE users SET password_hash = ? WHERE id = ?", [password_hash($new, PASSWORD_DEFAULT), $u['id']]);
@@ -38,8 +38,8 @@ page_header($u['role'] === 'student' ? t('my_questions') : t('my_account')); ?>
   <form method="post" class="aform">
     <?= csrf_field() ?><input type="hidden" name="change_pass" value="1">
     <label><?= h(t('cur_pass')) ?><input type="password" name="current" autocomplete="current-password" dir="ltr" required></label>
-    <label><?= h(t('password_new')) ?><input type="password" name="password" autocomplete="new-password" dir="ltr" required minlength="8"></label>
-    <label><?= h(t('password2')) ?><input type="password" name="password2" autocomplete="new-password" dir="ltr" required minlength="8"></label>
+    <label><?= h(pw_label()) ?><input type="password" name="password" autocomplete="new-password" dir="ltr" required minlength="<?= PASSWORD_MIN ?>"></label>
+    <label><?= h(t('password2')) ?><input type="password" name="password2" autocomplete="new-password" dir="ltr" required minlength="<?= PASSWORD_MIN ?>"></label>
     <button class="abtn"><?= h(t('save')) ?></button>
   </form>
 </details>

@@ -1,11 +1,18 @@
 <?php
 require __DIR__ . '/inc/layout.php';
+// The home page opens only after login (Rami, 21 Nov 2026): a visitor who is not logged in goes to the login form first,
+// and comes back here (with the same tab, e.g. ?c=bagrut-5) after logging in.
+if (!current_user()) {
+    $back = 'index.php' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '');
+    header('Location: login.php?next=' . rawurlencode(safe_next($back)));
+    exit;
+}
 
 $curricula = q("SELECT c.*, cn.name, cn.description FROM curricula c
                 LEFT JOIN curriculum_names cn ON cn.curriculum_id = c.id AND cn.lang = ?
                 ORDER BY c.sort_order", [lang()]);
-// the Hebrew page shows only the Hebrew curricula (no French track)
-if (lang() === 'he') {
+// the Hebrew page shows only the Hebrew curricula (no French track); while French is switched off, no page shows it
+if (lang() === 'he' || !FRENCH_ENABLED) {
     $curricula = array_values(array_filter($curricula, function ($c) { return $c['content_lang'] !== 'fr'; }));
 }
 $codes = array_column($curricula, 'code');
@@ -46,10 +53,14 @@ page_header(t('subjects')); ?>
 <form class="qfind" action="question.php" method="get" role="search">
   <label for="qfind-id"><?= h(t('find_q')) ?></label>
   <input id="qfind-id" name="id" type="number" min="1" inputmode="numeric" required placeholder="<?= h(t('q_id')) ?>" aria-label="<?= h(t('q_id')) ?>">
-  <select name="lang" aria-label="<?= h(t('q_lang')) ?>">
-    <?php foreach (LANGS as $code => $info): ?><option value="<?= h($code) ?>"<?= $code === lang() ? ' selected' : '' ?>><?= h($info[0]) ?></option><?php endforeach; ?>
-  </select>
   <button type="submit"><?= h(t('go')) ?></button>
+</form>
+<form class="qfind" action="exams.php" method="get" role="search">
+  <label for="efind-c"><?= h(t('find_exam')) ?></label>
+  <select id="efind-c" name="c" aria-label="<?= h(t('find_exam')) ?>">
+    <?php foreach ($curricula as $c): if (!$c['units']) continue; ?><option value="<?= h($c['code']) ?>"<?= $c['code'] === $active ? ' selected' : '' ?>><?= h($c['name']) ?></option><?php endforeach; ?>
+  </select>
+  <button type="submit"><?= h(t('search_btn')) ?></button>
 </form>
 
 <nav class="tracks" role="tablist">

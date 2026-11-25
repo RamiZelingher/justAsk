@@ -17,7 +17,7 @@ def tr(entity, eid, field, orig):
     row = c.execute("SELECT html FROM translations WHERE entity=? AND entity_id=? AND field=? AND lang=?", (entity, eid, field, LANG)).fetchone()
     return row[0] if row else orig
 
-q = c.execute("""SELECT q.id, q.title, e.title FROM questions q LEFT JOIN exams e ON e.id = q.exam_id
+q = c.execute("""SELECT q.id, q.title, e.title, e.session, e.year, e.units FROM questions q LEFT JOIN exams e ON e.id = q.exam_id
                  WHERE q.id = ?""", (QID,)).fetchone()
 subj = c.execute("""SELECT sn.name FROM question_subjects qs JOIN subject_names sn
                     ON sn.subject_id = qs.subject_id AND sn.lang = ? WHERE qs.question_id = ?""", (LANG, QID)).fetchone()
@@ -25,7 +25,7 @@ parts = c.execute("SELECT id, part_no, body_html, final_answer_html FROM questio
 
 
 def img_data(m):
-    fn = m.group(1).split('/')[-1]
+    fn = m.group(1)[len('/media/'):]   # keeps subfolders such as 2006/QD2006SA01.gif
     p = os.path.join(MEDIA, fn)
     if not os.path.exists(p):
         return m.group(0)
@@ -45,7 +45,10 @@ LBL = dict(he=dict(q='השאלה', h='רמזים', s='פתרון מלא', a='ת�
                    dir='rtl', ttl='שאלה'),
            en=dict(q='The question', h='Hints', s='Full solution', a='Final answer', code='Question code = %d', exam='Bagrut %s',
                    tag='Math bagrut questions with guided solutions', foot='JustAsk · Question %d · Full interactive solution on the site: question.php?id=%d&amp;lang=en',
-                   dir='ltr', ttl='Question'))[LANG]
+                   dir='ltr', ttl='Question'),
+           ar=dict(q='السؤال', h='تلميحات', s='الحل الكامل', a='الإجابة النهائية', code='رمز السؤال = %d', exam='بجروت %s',
+                   tag='أسئلة بجروت في الرياضيات مع حلول موجّهة', foot='JustAsk · السؤال %d · الحل الكامل والتفاعلي في الموقع: question.php?id=%d&amp;lang=ar',
+                   dir='rtl', ttl='سؤال'))[LANG]
 out = []
 for pid, pno, body, final in parts:
     body = tr('part', pid, 'body', body); final = tr('part', pid, 'answer', final)
@@ -70,12 +73,25 @@ for pid, pno, body, final in parts:
     out.append(''.join(sec))
 
 MONTHS = {'ינואר': 'January', 'פברואר': 'February', 'מרץ': 'March', 'מאי': 'May', 'יוני': 'June', 'יולי': 'July',
-          'אוגוסט': 'August', 'חורף': 'Winter', 'קיץ': 'Summer', 'מועד ב': 'Moed B', 'יחידות': 'units'}
+          'אוגוסט': 'August', 'דצמבר': 'December', 'חורף': 'Winter', 'קיץ': 'Summer', 'מועד ב': 'Moed B', 'יחידות': 'units'}
+# same wording as exam_label() in inc/i18n.php
+SESSIONS = {'קיץ מועד א': 'Summer (1st sitting)', 'קיץ מועד ב': 'Summer (2nd sitting)', 'קיץ מועד מיוחד': 'Summer (special sitting)'}
 ex = q[2] or ''
-if LANG != 'he':
-    for k, v in MONTHS.items():
-        ex = ex.replace(k, v)
-    ex = re.sub(r'(units) (\w+ \d{4})', r'\1, \2', ex)
+# Arabic: same wording as exam_label() in inc/i18n.php
+AR = {'ינואר': 'كانون الثاني', 'פברואר': 'شباط', 'מאי': 'أيار', 'יוני': 'حزيران', 'יולי': 'تموز', 'אוגוסט': 'آب',
+      'דצמבר': 'كانون الأول', 'קיץ': 'صيف', 'חורף': 'شتاء', 'קיץ מועד א': 'صيف (موعد أ)', 'קיץ מועד ב': 'صيف (موعد ب)',
+      'קיץ מועד מיוחד': 'صيف (موعد خاص)'}
+if LANG == 'ar' and q[4]:
+    ex = (('%s وحدات، ' % q[5]) if q[5] else '') + ('%s %s' % (AR.get(q[3] or '', q[3] or ''), q[4])).strip()
+elif LANG != 'he':
+    sess, year, units = q[3] or '', q[4], q[5]
+    if year:
+        sess = SESSIONS.get(sess, MONTHS.get(sess, sess))
+        ex = ('%s units, ' % units if units else '') + ('%s %s' % (sess, year)).strip()
+    else:
+        for k, v in MONTHS.items():
+            ex = ex.replace(k, v)
+        ex = re.sub(r'(units) (\w+ \d{4})', r'\1, \2', ex)
 title = ex and (LBL['exam'] % ex) or ''
 page = f"""<!DOCTYPE html><html lang="{LANG}" dir="{LBL['dir']}"><head><meta charset="utf-8">
 <title>JustAsk · {LBL['ttl']} {QID}</title>
@@ -93,6 +109,7 @@ math {{ font-size: 1.08em; direction: ltr; }}
 .tag.code {{ background: #2453c9; color: #fff; font-weight: bold; }}
 h2 {{ font-size: 13pt; color: #2453c9; margin: 18px 0 8px; padding-bottom: 3px; border-bottom: 1px solid #e2e6ee; break-after: avoid; }}
 .box {{ border: 1px solid #e2e6ee; border-radius: 8px; padding: 10px 14px; background: #fafbfe; }}
+.box {{ display: flow-root; }}   /* keeps floated tables (align=right) inside the box */
 .qtext table {{ width: 100%; }} .qtext td {{ vertical-align: top; }}
 img.fig, img {{ max-width: 100%; }}
 .hints li {{ margin-bottom: 6px; break-inside: avoid; }}
